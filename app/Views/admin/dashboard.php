@@ -51,7 +51,7 @@
 <tr class="table-dark">
     <th>Name</th>
     <th>Email</th>
-    <th>Event ID</th>
+    <th>Event Title</th>
     <th>Status</th>
     <th>Action</th>
 </tr>
@@ -63,7 +63,7 @@
 <tr class="<?= $rowClass ?>">
     <td><?= esc($r['name']) ?></td>
     <td><?= esc($r['email']) ?></td>
-    <td><?= esc($r['event_id']) ?></td>
+    <td><?= esc($r['event_title'] ?? 'Unknown Event') ?></td>
     <td>
         <?php if($r['status'] === 'Pending'): ?>
             <span class="badge bg-warning text-dark">Pending</span>

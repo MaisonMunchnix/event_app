@@ -24,8 +24,18 @@ class AdminController extends BaseController
             $filterRegistrations = $allRegistrations;
         }
 
+        $events = $eventModel->findAll();
+        $eventLookup = [];
+        foreach ($events as $event) {
+            $eventLookup[$event['id']] = $event['title'];
+        }
+
+        foreach ($filterRegistrations as $key => $registration) {
+            $filterRegistrations[$key]['event_title'] = $eventLookup[$registration['event_id']] ?? 'Unknown Event';
+        }
+
         $data = [
-            'events' => $eventModel->findAll(),
+            'events' => $events,
             'registrations' => $allRegistrations,
             'filteredRegistrations' => $filterRegistrations,
             'statusFilter' => $statusFilter,
@@ -129,6 +139,7 @@ class AdminController extends BaseController
 
     public function registrations()
     {
+        $eventModel = new EventModel();
         $registrationModel = new RegistrationModel();
 
         $allRegistrations = $registrationModel->findAll();
@@ -139,6 +150,16 @@ class AdminController extends BaseController
             $filterRegistrations = $registrationModel->where('status', $statusFilter)->findAll();
         } else {
             $filterRegistrations = $allRegistrations;
+        }
+
+        $events = $eventModel->findAll();
+        $eventLookup = [];
+        foreach ($events as $event) {
+            $eventLookup[$event['id']] = $event['title'];
+        }
+
+        foreach ($filterRegistrations as $key => $registration) {
+            $filterRegistrations[$key]['event_title'] = $eventLookup[$registration['event_id']] ?? 'Unknown Event';
         }
 
         $data = [
