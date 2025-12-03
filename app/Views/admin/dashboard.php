@@ -19,6 +19,9 @@
             </div>
         </div>
     </div>
+</div>
+
+<div  class="row mb-4">
     <div class="col-md-4">
         <div class="card text-white bg-warning mb-3">
             <div class="card-header">Pending Approvals</div>
@@ -27,6 +30,18 @@
                     <?= count(array_filter($registrations ?? [], fn($r) => $r['status'] === 'Pending')) ?>
                 </h5>
                 <a href="/admin/registrations" class="btn btn-light btn-sm">Approve Now</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">Events Feedback</div>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <?= count(array_filter($registrations ?? [], fn($r) => $r['status'] === 'Pending')) ?>
+                </h5>
+                <a href="/admin/feedback" class="btn btn-light btn-sm">View Feedback</a>
             </div>
         </div>
     </div>
@@ -57,28 +72,28 @@
 </tr>
 
 <?php foreach($filteredRegistrations as $r): ?>
-<?php 
-    $rowClass = $r['status'] === 'Pending' ? 'table-warning' : 'table-success';
-?>
-<tr class="<?= $rowClass ?>">
-    <td><?= esc($r['name']) ?></td>
-    <td><?= esc($r['email']) ?></td>
-    <td><?= esc($r['event_title'] ?? 'Unknown Event') ?></td>
-    <td>
-        <?php if($r['status'] === 'Pending'): ?>
-            <span class="badge bg-warning text-dark">Pending</span>
-        <?php else: ?>
-            <span class="badge bg-success">Approved</span>
-        <?php endif; ?>
-    </td>
-    <td>
-        <?php if($r['status'] === 'Pending'): ?>
-        <a href="/admin/approve/<?= $r['id'] ?>" class="btn btn-sm btn-primary">Approve</a>
-        <?php else: ?>
-        <button class="btn btn-sm btn-secondary" disabled>Approved</button>
-        <?php endif; ?>
-    </td>
-</tr>
+    <?php 
+        $rowClass = $r['status'] === 'Pending' ? 'table-warning' : 'table-success';
+    ?>
+    <tr class="<?= $rowClass ?>">
+        <td><?= esc($r['name']) ?></td>
+        <td><?= esc($r['email']) ?></td>
+        <td><?= esc($r['event_title'] ?? 'Unknown Event') ?></td>
+        <td>
+            <?php if($r['status'] === 'Pending'): ?>
+                <span class="badge bg-warning text-dark">Pending</span>
+            <?php else: ?>
+                <span class="badge bg-success">Approved</span>
+            <?php endif; ?>
+        </td>
+        <td>
+            <?php if($r['status'] === 'Pending'): ?>
+            <a href="/admin/approve/<?= $r['id'] ?>" class="btn btn-sm btn-primary">Approve</a>
+            <?php else: ?>
+            <button class="btn btn-sm btn-secondary" disabled>Approved</button>
+            <?php endif; ?>
+        </td>
+    </tr>
 <?php endforeach; ?>
 </table>
 
