@@ -106,44 +106,8 @@ class AdminController extends BaseController
     {
         $eventModel = new EventModel();
         $registrationModel = new RegistrationModel();
+
         $event = $eventModel->find($id);
-
-        $allRegistrations = $registrationModel->findAll();
-
-        $statusFilter = $this->request->getGet('status');
-
-        if (!empty($statusFilter)) {
-            $filterRegistrations = $registrationModel
-                ->where('status', $statusFilter)
-                ->findAll($id);
-        } else {
-            $filterRegistrations = $allRegistrations;
-        }
-
-        $events = $eventModel->where('id', $id)->findAll();
-        $eventLookup = [];
-        foreach ($events as $event) {
-            $eventLookup[$event['id']] = $event['title'];
-        }
-
-        foreach ($filterRegistrations as $key => $registration) {
-            // $filterRegistrations[$key]['event_title'] = $eventLookup[$registration['event_id']] ?? 'Unknown Event';
-            // $filterRegistrations[$key]['event_title'] = $eventLookup[$registration['event_id']];
-
-            if (isset($eventLookup[$registration['event_id']])) {
-                $filterRegistrations[$key]['event_title'] = $eventLookup[$registration['event_id']];
-            }
-        }
-
-
-
-
-        $data = [
-            'events' => $events,
-            'registrations' => $allRegistrations,
-            'filteredRegistrations' => $filterRegistrations,
-            'statusFilter' => $statusFilter,
-        ];
 
         if (!$event) {
             return redirect()
@@ -151,8 +115,27 @@ class AdminController extends BaseController
                 ->with('error', 'Event not found.');
         }
 
-        return view('admin/view_event', array_merge(['event' => $event], $data));
+        // Get filter (optional)
+        $statusFilter = $this->request->getGet('status');
+
+        // Base query: only registrations for THIS event
+        $query = $registrationModel->where('event_id', $id);
+
+        if (!empty($statusFilter)) {
+            $query->where('status', $statusFilter);
+        }
+
+        $registrations = $query->findAll();
+
+        $data = [
+            'event' => $event,
+            'filteredRegistrations' => $registrations,
+            'statusFilter' => $statusFilter,
+        ];
+
+        return view('admin/view_event', $data);
     }
+
 
     public function updateEvent($id)
     {
