@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\EventModel;
+use App\Models\FeedbackModel;
 use App\Models\RegistrationModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -101,6 +102,41 @@ class AdminController extends BaseController
         return view('admin/edit_event', ['event' => $event]);
     }
 
+    public function viewEvent($id)
+    {
+        $eventModel = new EventModel();
+        $registrationModel = new RegistrationModel();
+
+        $event = $eventModel->find($id);
+
+        if (!$event) {
+            return redirect()
+                ->to('/admin/events')
+                ->with('error', 'Event not found.');
+        }
+
+        // Get filter (optional)
+        $statusFilter = $this->request->getGet('status');
+
+        // Base query: only registrations for THIS event
+        $query = $registrationModel->where('event_id', $id);
+
+        if (!empty($statusFilter)) {
+            $query->where('status', $statusFilter);
+        }
+
+        $registrations = $query->findAll();
+
+        $data = [
+            'event' => $event,
+            'filteredRegistrations' => $registrations,
+            'statusFilter' => $statusFilter,
+        ];
+
+        return view('admin/view_event', $data);
+    }
+
+
     public function updateEvent($id)
     {
         $eventModel = new EventModel();
@@ -185,5 +221,30 @@ class AdminController extends BaseController
         return redirect()
             ->back()
             ->with('success', 'Registration successfully approved.');
+    }
+
+    public function feedback()
+    {
+        $feedbackModel = new FeedbackModel();
+        $eventModel = new EventModel();
+        $registrationModel = new RegistrationModel();
+
+        $allFeedback = $feedbackModel->orderBy('created_at', 'DESC')->findAll();
+
+        // Attach event and registration details
+        foreach ($allFeedback as $key => $feedback) {
+            $event = $eventModel->find($feedback['event_id']);
+            $registration = $registrationModel->find($feedback['registration_id']);
+
+            $allFeedback[$key]['event_title'] = $event['title'] ?? 'N/A';
+            $allFeedback[$key]['registrant_name'] = $registration['name'] ?? 'N/A';
+            $allFeedback[$key]['registrant_email'] = $registration['email'] ?? 'N/A';
+        }
+
+        $data = [
+            'feedback' => $allFeedback
+        ];
+
+        return view('admin/feedback', $data);
     }
 }

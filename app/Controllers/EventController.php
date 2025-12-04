@@ -24,6 +24,23 @@ class EventController extends BaseController
         return view('events/list', ['events' => $events]);
     }
 
+    public function myRegistrations()
+    {
+        $model = new EventModel();
+        $registration = new RegistrationModel();
+
+        $regs = $registration->orderBy('created_at')->findAll();
+        // $data['events'] = $model->orderBy('event_date', 'ASC')->findAll();
+
+        foreach ($regs as $key => $reg) {
+            $regs[$key]['event_id'] = $registration
+                ->where('event_id', $reg['id'])
+                ->where('event_id', $reg['id'])
+                ->countAllResults();
+        }
+        return view('user/my_registrations', ['regs' => $regs]);
+    }
+
     public function register($id)
     {
         $model = new EventModel();
@@ -78,17 +95,10 @@ class EventController extends BaseController
             'status' => 'Pending'
         ];
 
-        $insertId = $registrationModel->insert($data);
-
-        if ($insertId) {
-            $eventModel = new EventModel();
-            $event = $eventModel->find($event_id);
-            $registration = $registrationModel->find($insertId);
-
-            return view('events/success', [
-                'event' => $event,
-                'registration' => $registration,
-            ]);
+        if ($registrationModel->insert($data)) {
+            return redirect()
+                ->to('/')
+                ->with('success', 'Registration submitted successfully.');
         }
 
         return redirect()
